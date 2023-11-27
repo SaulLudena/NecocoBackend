@@ -11,23 +11,23 @@ model likes {
   idLike      Int       @id @default(autoincrement())
   fkIdUsuario Int?
   fkIdPost    Int?
-  usuarios    usuarios? @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict, map: "likes_ibfk_1")
-  posts       posts?    @relation(fields: [fkIdPost], references: [idPost], onDelete: Restrict, onUpdate: Restrict, map: "likes_ibfk_2")
+  usuarios    usuarios? @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Cascade, map: "likes_ibfk_1")
+  posts       posts?    @relation(fields: [fkIdPost], references: [idPost], onDelete: Cascade, map: "likes_ibfk_2")
 
-  @@index([fkIdPost], map: "fkIdPost")
-  @@index([fkIdUsuario], map: "fkIdUsuario")
+  @@index([fkIdUsuario], map: "likes_ibfk_1")
+  @@index([fkIdPost], map: "likes_ibfk_2")
 }
 
 model posts {
   idPost               Int             @id @default(autoincrement())
-  descripcionPost      String          @db.Text
+  descripcionPost      String?         @db.Text
   fechaPublicacionPost DateTime        @default(now()) @db.Timestamp(0)
   fkIdUsuario          Int?
   likes                likes[]
-  usuarios             usuarios?       @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict, map: "posts_ibfk_1")
+  usuarios             usuarios?       @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Cascade, map: "posts_ibfk_1")
   respuestapost        respuestapost[]
 
-  @@index([fkIdUsuario], map: "fkIdUsuario")
+  @@index([fkIdUsuario], map: "posts_ibfk_1")
 }
 
 model respuestapost {
@@ -36,16 +36,16 @@ model respuestapost {
   fechaPublicacionRespuesta DateTime  @default(now()) @db.Timestamp(0)
   fkIdPost                  Int?
   fkIdUsuario               Int?
-  posts                     posts?    @relation(fields: [fkIdPost], references: [idPost], onDelete: Restrict, onUpdate: Restrict, map: "respuestapost_ibfk_1")
-  usuarios                  usuarios? @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict, map: "respuestapost_ibfk_2")
+  posts                     posts?    @relation(fields: [fkIdPost], references: [idPost], onDelete: Cascade, map: "respuestapost_ibfk_1")
+  usuarios                  usuarios? @relation(fields: [fkIdUsuario], references: [idUsuario], onDelete: Cascade, map: "respuestapost_ibfk_2")
 
-  @@index([fkIdPost], map: "fkIdPost")
-  @@index([fkIdUsuario], map: "fkIdUsuario")
+  @@index([fkIdPost], map: "respuestapost_ibfk_1")
+  @@index([fkIdUsuario], map: "respuestapost_ibfk_2")
 }
 
 model usuarios {
   idUsuario          Int             @id @unique @default(autoincrement())
-  nombreUsuario      String          @unique @db.VarChar(255)
+  nombreUsuario      String          @unique(map: "nombreUsuario") @db.VarChar(255)
   correoUsuario      String          @unique(map: "correoUsuario") @db.VarChar(255)
   contraseniaUsuario String          @db.VarChar(255)
   likes              likes[]

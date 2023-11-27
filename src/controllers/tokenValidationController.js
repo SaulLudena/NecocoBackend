@@ -38,12 +38,16 @@ exports.login = async (req, res) => {
               });
             }
 
-            res.json({ message: "Email o contrasena incorrecta 2" });
+            res.json({
+              message: "Email o contrasena incorrecta",
+              status: 400,
+            });
           }
         );
       } else {
         res.json({
           message: "Email o contrasena incorrecta",
+          status: 400,
         });
       }
     }
@@ -53,13 +57,25 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.protectedRoute = async (req, res) => {
+exports.protectedRoute = async (req, res, next) => {
   try {
-    const receivedToken = req.headers["authorization"];
+    // Obtener token del encabezado de autorización
+    const receivedToken = req.headers["authorizationtoken"];
+    if (!receivedToken) {
+      return res
+        .status(401)
+        .json({ error: "Token no proporcionado", status: 401 });
+    }
     jwt.verify(receivedToken, "necoco", (err, decoded) => {
-      err ? res.status(401).json() : res.json({ decoded });
+      if (err) {
+        return res.status(401).json({ error: "Token no válido", status: 401 });
+      }
+
+      res.json({ message: "Token verificado con éxito", decoded, status: 200 });
+
+      req.user = next();
     });
   } catch (error) {
-    res.json({ message: "algo pasó" });
+    res.status(500).json({ error: "Error interno del servidor", status: 500 });
   }
 };

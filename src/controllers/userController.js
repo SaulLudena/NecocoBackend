@@ -4,9 +4,9 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 
 exports.getUserInfo = async (req, res) => {
-  const { localStorageToken } = req.body;
+  const { CookieToken } = req.body;
   try {
-    jwt.verify(localStorageToken, "necoco", async (err, decoded) => {
+    jwt.verify(CookieToken, "necoco", async (err, decoded) => {
       if (err) {
         res.status(401).json();
       } else {
@@ -14,6 +14,7 @@ exports.getUserInfo = async (req, res) => {
         const userInfo = await prisma.usuarios.findUnique({
           where: { idUsuario: id },
           select: {
+            idUsuario: true,
             nombreUsuario: true,
           },
         });
@@ -51,17 +52,13 @@ exports.register = async (req, res) => {
       message: "Usuario agregado correctamente",
     });
   } catch (error) {
-    console.log(error);
-    //validamos que exista un error de tipo prisma
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      //validamos que el tipo de error sea un error de datos duplicados "P2002"
       if (error.code === "P2002") {
-        //nos indica que el campo email usuario ya existe en la base de datos
         if (error.meta.target === "correoUsuario")
           res.json({
             message: "Email no disponible, ingrese otro",
           });
-        //nos indica que el campo nombre publico usuario usuario ya existe en la base de datos
+
         if (error.meta.target === "nombreUsuario")
           res.json({
             message: "Nombre de usuario no disponible, ingrese otro",
